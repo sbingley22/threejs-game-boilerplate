@@ -26,7 +26,8 @@ function runGame() {
   scene.background = null
   //console.log(pixelPass, noisePass)
   pixelPass.uniforms.pixelSize.value = 3.0
-  noisePass.enabled = true
+  pixelPass.uniforms.pixelSize.value = 1.0
+  noisePass.enabled = false
   noisePass.uniforms.amount.value = 0.5
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -50,6 +51,7 @@ function runGame() {
   const chars = character.loadCharacters(scene, [
     { template: "Fem", pos: [1,0,0] },
     { template: "Male", pos: [-1,0,0] },
+    { template: "Knight", pos: [0,0,0] },
   ])
   const ground = createGround(scene, "grass")
   createBackground(scene, "city", [6,11.5,0], [0,-Math.PI/2,0], [30,25], [1.0,1], [1.0,1.0,1.0])
@@ -92,8 +94,7 @@ function runGame() {
     } else {
       // Mouse event
       if (event.button === 2) {
-        chant = "";
-        hudInfo.innerText = chant;
+        console.log("RMB Clicked")
         return;
       }
       clientX = event.clientX;

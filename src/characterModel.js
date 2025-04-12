@@ -11,11 +11,18 @@ const templates = {
   "Fem": {
     meshes: ["Ana", "Hair-Wavy", "Sword", "Shield"],
     meshColors: [{name: "ana_1", color: 0x1144aa}],
+    morphs: [{meshName: "ana", morphName: "Hands Fist", value: 0.5}],
     scale: [1,1,1],
   },
   "Male": {
     meshes: ["Adam", "HairM-Mowhawk", "Pistol"],
     meshColors: [{name: "adam_1", color: 0x99AA44}],
+    morphs: [{meshName: "adam", morphName: "Hands Fist", value: 1}, {meshName: "adam", morphName: "Jacked", value: 1}],
+    scale: [1,1.1,1],
+  },
+  "Knight": {
+    meshes: ["Eve", "Hair-TiedBack", "Sword", "Shield", "PlateAbs", "PlateBoots", "PlateChest", "PlateForearms", "PlateShins", "PlateShoulder", "PlateThighs"],
+    meshColors: [{name: "eve", color: 0x997767}],
     scale: [1,1.1,1],
   },
 }
@@ -47,7 +54,8 @@ function addCharacter(scene, template, pos) {
 
   const character = cloneCharacter(scene, template, pos)
   playAnimation(character, "Sword Idle")
-  templates[template].meshColors.forEach(m => changeMeshColor(character.obj, m.name, m.color))
+  if (templates[template].meshColors) templates[template].meshColors.forEach(m => changeMeshColor(character.obj, m.name, m.color))
+  if (templates[template].morphs) templates[template].morphs.forEach(m => updateMorph(character.obj, m.meshName, m.morphName, m.value))
   if (templates[template].scale) character.obj.scale.set(...templates[template].scale)
   createShadow(character.obj)
 
@@ -139,10 +147,26 @@ function changeMeshColor(obj, meshName, color) {
   });
 }
 
+function updateMorph(obj, meshName, morphName, value) {
+  //console.log(obj)
+  obj.traverse((child) => {
+    if (child.isMesh && child.name.includes(meshName)) {
+      const morphIndex = child.morphTargetDictionary[morphName]
+      if (morphIndex !== undefined) {
+        child.morphTargetInfluences[morphIndex] = value
+      }
+      else {
+        console.log("Couldn't find morph")
+      }
+    }
+  })
+}
+
 export {
   loadModel,
   playAnimation,
   addCharacter,
   showMeshes,
-  changeMeshColor
+  changeMeshColor,
+  updateMorph,
 };
