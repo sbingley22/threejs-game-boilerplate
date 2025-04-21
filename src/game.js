@@ -22,13 +22,12 @@ function runGame() {
   document.body.appendChild(renderer.domElement);
   renderer.domElement.classList.add('three-scene')
 
-  const { composer, pixelPass, noisePass } = setupPostProcessing(renderer, scene, camera);
+  const { composer, pixelPass, noisePass, greyPass, dotScreenPass, toonPass, brightnessPass } = setupPostProcessing(renderer, scene, camera)
   scene.background = null
-  //console.log(pixelPass, noisePass)
-  pixelPass.uniforms.pixelSize.value = 3.0
   pixelPass.uniforms.pixelSize.value = 1.0
-  noisePass.enabled = false
-  noisePass.uniforms.amount.value = 0.5
+  toonPass.enabled = true
+  brightnessPass.enabled = true
+  brightnessPass.uniforms.brightness.value = 1.0
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -109,7 +108,7 @@ function runGame() {
     if (clickTime > 200) return;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(chars[0].obj, true);
+    const intersects = raycaster.intersectObject(chars[0], true);
 
     if (intersects.length > 0) {
       character.playAnimation(chars[0], "Sword Slash");
@@ -133,7 +132,7 @@ function runGame() {
 
     if (chars.length > 0) {
       chars.forEach(c => {
-        c.mixer.update(delta)
+        c.userData.mixer.update(delta)
       })
     }
 

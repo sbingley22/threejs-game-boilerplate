@@ -54,10 +54,10 @@ function addCharacter(scene, template, pos) {
 
   const character = cloneCharacter(scene, template, pos)
   playAnimation(character, "Sword Idle")
-  if (templates[template].meshColors) templates[template].meshColors.forEach(m => changeMeshColor(character.obj, m.name, m.color))
-  if (templates[template].morphs) templates[template].morphs.forEach(m => updateMorph(character.obj, m.meshName, m.morphName, m.value))
-  if (templates[template].scale) character.obj.scale.set(...templates[template].scale)
-  createShadow(character.obj)
+  if (templates[template].meshColors) templates[template].meshColors.forEach(m => changeMeshColor(character, m.name, m.color))
+  if (templates[template].morphs) templates[template].morphs.forEach(m => updateMorph(character, m.meshName, m.morphName, m.value))
+  if (templates[template].scale) character.scale.set(...templates[template].scale)
+  createShadow(character)
 
   return character
 }
@@ -71,8 +71,9 @@ function cloneCharacter(scene, template, pos) {
   const cloneMixer = new THREE.AnimationMixer(clone);
   clone.userData.previousAction = null
   clone.userData.activeAction = null
+  clone.userData.mixer = cloneMixer
 
-  const character = {obj: clone, mixer: cloneMixer}
+  const character = clone
   cloneMixer.addEventListener('finished', (e) => {
     const finishedAction = e.action.getClip().name
     if (["Sword Slash", "Take Damage", "Fight Jab"].includes(finishedAction)) {
@@ -90,25 +91,25 @@ function cloneCharacter(scene, template, pos) {
 function playAnimation(c, name) {
   if (!c) return
 
-  const mixer = c.mixer
+  const mixer = c.userData.mixer
   if (!mixer || !charAnimations[name]) {
     console.warn(`Animation "${name}" not found`);
     return;
   }
   
   const newAction = mixer.clipAction(charAnimations[name]);
-  if (c.obj.userData.activeAction !== newAction) {
-    c.obj.userData.previousAction = c.obj.userData.activeAction
-    c.obj.userData.activeAction = newAction;
+  if (c.userData.activeAction !== newAction) {
+    c.userData.previousAction = c.userData.activeAction
+    c.userData.activeAction = newAction;
     
-    if (c.obj.userData.previousAction) {
-      c.obj.userData.previousAction.fadeOut(0.1);
+    if (c.userData.previousAction) {
+      c.userData.previousAction.fadeOut(0.1);
     }
-    c.obj.userData.activeAction.reset().fadeIn(0.1).play();
+    c.userData.activeAction.reset().fadeIn(0.1).play();
     
     if (["Sword Slash", "Pistol Fire", "Fight Jab", "Take Damage"].includes(name)) {
-      c.obj.userData.activeAction.setLoop(THREE.LoopOnce, 1);
-      c.obj.userData.activeAction.clampWhenFinished = true;
+      c.userData.activeAction.setLoop(THREE.LoopOnce, 1);
+      c.userData.activeAction.clampWhenFinished = true;
     }
   }
 }
